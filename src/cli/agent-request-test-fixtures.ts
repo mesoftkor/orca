@@ -39,6 +39,7 @@ export const REQUEST_PROMPT = {
     }
   }
 }
+/** Supplies one inspected approval identity so tests vary scope without inventing live requests. */
 export function answerFile() {
   return {
     workspaceId: REQUEST_WORKSPACE,
@@ -54,6 +55,7 @@ export function answerFile() {
   }
 }
 
+/** Provides deterministic read/receipt responses; overrides simulate races without a live runtime. */
 export function requestFixtureClient(
   override?: (method: string, params: unknown, options: unknown) => unknown
 ) {
@@ -113,6 +115,7 @@ export function requestFixtureClient(
     return { id: 'test-request', ok: true, _meta: { runtimeId: REQUEST_RUNTIME }, result }
   })
   const client: AgentRequestClient = {
+    /** Adapts fixture replies to the generic client API while recording each attempted RPC. */
     async call<T>(
       method: string,
       params?: unknown,

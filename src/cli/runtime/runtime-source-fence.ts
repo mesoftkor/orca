@@ -37,6 +37,7 @@ export class RuntimeSourceFence {
     }
   }
 
+  /** Rejects a changed runtime before probing and reconciles explicit and inherited profile pins. */
   async check(
     metadata: RuntimeMetadata,
     method: string,
@@ -58,6 +59,7 @@ export class RuntimeSourceFence {
     return pinnedSource ?? inheritedSource
   }
 
+  /** Verifies uncached runtime incarnations still serve the launching profile before admitting them. */
   private async checkLaunchingSource(
     metadata: RuntimeMetadata,
     method: string

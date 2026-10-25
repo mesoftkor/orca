@@ -29,6 +29,7 @@ export class RemoteRuntimeCompatGate {
     private readonly environmentSelector: string | null
   ) {}
 
+  /** Checks remote compatibility when needed and carries the explicit pin to the target transport. */
   send<TResult>(args: {
     transport: WebSocketTransport
     connection: PairedRuntimeConnection

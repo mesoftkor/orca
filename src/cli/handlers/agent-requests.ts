@@ -6,6 +6,7 @@ import { listAgentRequests, type AgentRequestScope } from '../agent-request-inve
 import { answerAgentRequest } from '../agent-request-answer'
 import { readAgentRequestAnswerFile } from '../agent-request-answer-file'
 
+/** Requires explicit session/workspace selectors and refuses ambient focus or wildcard targets. */
 function scope({ flags }: HandlerContext): AgentRequestScope {
   const worktree = getRequiredStringFlag(flags, 'worktree')
   if (['active', 'current', 'all', '*'].includes(worktree)) {
@@ -21,6 +22,7 @@ function scope({ flags }: HandlerContext): AgentRequestScope {
   }
 }
 
+/** Prints current scoped prompts and refuses item IDs outside the authoritative snapshot. */
 const read: CommandHandler = async (context) => {
   const target = scope(context)
   const inventory = await listAgentRequests(context.client, target)
@@ -49,10 +51,12 @@ const read: CommandHandler = async (context) => {
 
 export const AGENT_REQUEST_HANDLERS: Record<string, CommandHandler> = {
   'agent requests list': read,
+  /** Requires a named item before performing the same authoritative scoped read. */
   'agent requests get': async (context) => {
     getRequiredStringFlag(context.flags, 'item')
     await read(context)
   },
+  /** Reads exact answers from a file and prints their receipt without interpreting prompt text. */
   'agent requests answer': async (context) => {
     const target = scope(context)
     const input = await readAgentRequestAnswerFile(

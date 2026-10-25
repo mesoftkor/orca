@@ -102,6 +102,7 @@ function buildCliStatusResponse(result: CliStatusResult): RuntimeRpcSuccess<CliS
   }
 }
 
+/** Projects an authenticated host reply into CLI status without treating unknown state as ready. */
 export function projectRemoteCliStatus(
   response: RuntimeRpcSuccess<RuntimeStatus>,
   environmentSelector: string | null

@@ -19,6 +19,7 @@ const CLI_CLIENT_CAPABILITIES = [
   ...AGENT_REQUEST_CLI_CAPABILITIES
 ] as const
 
+/** Sends one paired RPC with CLI capabilities and an optional execution-host runtime pin. */
 export async function sendWebSocketRequest<TResult>(
   connection: PairedRuntimeConnection,
   method: string,
@@ -46,6 +47,7 @@ export async function sendWebSocketRequest<TResult>(
   }
 }
 
+/** Validates status on the paired socket before sending the RPC with its target-local pin. */
 export async function sendWebSocketRequestWithStatusPreflight<TResult>(
   connection: PairedRuntimeConnection,
   method: string,

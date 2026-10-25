@@ -26,6 +26,7 @@ const AnswerFile = z
   .strict()
 export type AgentRequestAnswerFile = z.infer<typeof AnswerFile>
 
+/** Loads a size-checked JSON answer file and reports read or parse failures as safe CLI errors. */
 export async function readAgentRequestAnswerFile(path: string): Promise<AgentRequestAnswerFile> {
   try {
     const info = await stat(path)
@@ -45,6 +46,7 @@ export async function readAgentRequestAnswerFile(path: string): Promise<AgentReq
   }
 }
 
+/** Validates identity fields, matching session IDs and the native answer schema before submission. */
 export function parseAgentRequestAnswerFile(value: unknown): AgentRequestAnswerFile {
   const parsed = AnswerFile.safeParse(value)
   if (!parsed.success || parsed.data.expectedRequests.sessionId !== parsed.data.sessionId) {
@@ -58,6 +60,7 @@ export function parseAgentRequestAnswerFile(value: unknown): AgentRequestAnswerF
   return parsed.data
 }
 
+/** Fingerprints native answer fields while preserving question IDs, choices and typed text. */
 export function nativeAnswerParams(input: AgentRequestAnswerFile) {
   const envelope = {
     sessionId: input.sessionId,

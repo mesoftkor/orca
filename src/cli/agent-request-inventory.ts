@@ -39,10 +39,12 @@ export type AgentRequestInventory = {
   requests: AgentSessionCurrentRequest[]
 }
 
+/** Refuses an unverifiable read before callers can treat a partial view as actionable. */
 export function requestRefusal(message: string): never {
   throw new RuntimeClientError('agent_request_unverifiable', message)
 }
 
+/** Rejects replies from an incarnation other than the runtime pinned for this collection. */
 export function requireSameRuntime(response: RuntimeRpcSuccess<unknown>, runtimeId: string): void {
   if (response._meta.runtimeId !== runtimeId) {
     requestRefusal(
@@ -51,6 +53,7 @@ export function requireSameRuntime(response: RuntimeRpcSuccess<unknown>, runtime
   }
 }
 
+/** Returns the responding runtime ID only when authoritative native-request reads are supported. */
 export async function readRequestHost(client: AgentRequestClient): Promise<string> {
   const response = await client.call<RuntimeStatus>('status.get')
   const capabilities = response.result.capabilities ?? []
@@ -67,6 +70,7 @@ export async function readRequestHost(client: AgentRequestClient): Promise<strin
   return response._meta.runtimeId
 }
 
+/** Proves one native tab belongs to the explicit scope and returns its canonical workspace ID. */
 export async function verifyRequestWorkspace(
   client: AgentRequestClient,
   scope: AgentRequestScope,
@@ -93,6 +97,7 @@ export async function verifyRequestWorkspace(
   return snapshot.worktree
 }
 
+/** Reads a minimal history checkpoint and refuses resets or missing session fence evidence. */
 async function readFence(
   client: AgentRequestClient,
   sessionId: string,
@@ -118,6 +123,7 @@ async function readFence(
   return { fence: page.fence, epoch: page.epoch }
 }
 
+/** Compares every owner and version field required to join pages from one request snapshot. */
 export function sameRequestMarker(left: RequestMarker, right: RequestMarker): boolean {
   return (
     left.contract === right.contract &&
@@ -130,6 +136,7 @@ export function sameRequestMarker(left: RequestMarker, right: RequestMarker): bo
   )
 }
 
+/** Reads one bounded page and rejects an invalid contract, session identity or runtime reply. */
 async function piece(
   client: AgentRequestClient,
   sessionId: string,
@@ -150,6 +157,7 @@ async function piece(
   return parsed.data
 }
 
+/** Admits only complete, unique pending prompts; malformed rows invalidate the entire snapshot. */
 function pendingRequests(value: unknown): AgentSessionCurrentRequest[] {
   if (!Array.isArray(value)) {
     requestRefusal('The current-request snapshot is not a complete array.')
@@ -173,6 +181,7 @@ function pendingRequests(value: unknown): AgentSessionCurrentRequest[] {
   return result
 }
 
+/** Collects a bounded authoritative snapshot, refusing changes to its runtime, scope or owner. */
 export async function listAgentRequests(
   client: AgentRequestClient,
   scope: AgentRequestScope,

@@ -69,6 +69,7 @@ export function measureRemoteRuntimeSubscriptionParams(params: unknown): number 
   }
 }
 
+/** Serializes a bounded RPC frame with an explicit transport pin, leaving forwarding metadata intact. */
 export function serializeRemoteRuntimeRpcRequest(args: {
   requestId: string
   deviceToken: string

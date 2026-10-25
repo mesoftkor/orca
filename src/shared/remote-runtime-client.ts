@@ -32,6 +32,7 @@ export type RemoteRuntimeSubscriptionCallbacks<TResult = unknown> = {
   onClose?: () => void
 }
 
+/** Sends one authenticated remote request, keeping its runtime pin separate from forwarded metadata. */
 export function sendRemoteRuntimeRequest<TResult>(
   connection: PairedRuntimeConnection,
   method: string,
@@ -55,6 +56,7 @@ export function sendRemoteRuntimeRequest<TResult>(
   )
 }
 
+/** Runs the supplied status validator before the requested RPC on the same authenticated socket. */
 export function sendRemoteRuntimeRequestWithStatusPreflight<TResult>(
   connection: PairedRuntimeConnection,
   method: string,

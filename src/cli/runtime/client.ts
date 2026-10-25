@@ -84,6 +84,7 @@ export class RuntimeClient {
     return this.remote !== null
   }
 
+  /** Routes authenticated RPCs with optional target-local pins and existing mutation recovery. */
   async call<TResult>(
     method: string,
     params?: unknown,
@@ -218,6 +219,7 @@ export class RuntimeClient {
     return this.requestTimeoutMs
   }
 
+  /** Returns local or paired-host status while applying the paired runtime compatibility check. */
   async getCliStatus(): Promise<RuntimeRpcSuccess<CliStatusResult>> {
     if (this.remote) {
       const response = await this.call<RuntimeStatus>('status.get')

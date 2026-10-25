@@ -42,6 +42,10 @@ const RefusedAnswer = z.object({
   ok: z.literal(false),
   refusal: z.object({ code: z.string().min(1), details: z.unknown().optional() })
 })
+/**
+ * Submits a pinned answer; retry resubmits the same operation and may execute it for the first time.
+ * A matching receipt proves acceptance, not provider resumption.
+ */
 export async function answerAgentRequest(
   client: AgentRequestClient,
   scope: AgentRequestScope,

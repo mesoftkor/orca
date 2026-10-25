@@ -33,6 +33,7 @@ import type {
 import type { RuntimeStatus } from '../../runtime-types'
 import { isSafeTimerDelayMs, MAX_TIMER_DELAY_MS } from '../../timer-delay'
 
+/** Owns one E2EE RPC socket through authentication, optional preflight, bounded reply and cleanup. */
 export async function sendRemoteRuntimeRequestOnSocket<TResult>(
   connection: PairedRuntimeConnection,
   method: string,
