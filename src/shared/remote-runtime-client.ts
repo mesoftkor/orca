@@ -7,7 +7,11 @@ import type {
   RemoteRuntimeSubscriptionOptions,
   RemoteRuntimeTransportSubscriptionCallbacks
 } from './remote-runtime/requests/remote-runtime-subscription-contract'
-import type { RuntimeOrchestrationEnvelope, RuntimeRpcResponse } from './runtime-rpc-envelope'
+import type {
+  ExpectedRuntimeSource,
+  RuntimeOrchestrationEnvelope,
+  RuntimeRpcResponse
+} from './runtime-rpc-envelope'
 import type { RuntimeStatus } from './runtime-types'
 
 export type RemoteRuntimeSubscription = {
@@ -35,7 +39,8 @@ export function sendRemoteRuntimeRequest<TResult>(
   timeoutMs: number,
   envelope?: RuntimeOrchestrationEnvelope,
   signal?: AbortSignal,
-  clientCapabilities: readonly RuntimeCapability[] = []
+  clientCapabilities: readonly RuntimeCapability[] = [],
+  expectedRuntimeSource?: ExpectedRuntimeSource
 ): Promise<RuntimeRpcResponse<TResult>> {
   return sendRemoteRuntimeRequestOnSocket(
     connection,
@@ -45,7 +50,8 @@ export function sendRemoteRuntimeRequest<TResult>(
     envelope,
     undefined,
     signal,
-    clientCapabilities
+    clientCapabilities,
+    expectedRuntimeSource
   )
 }
 
@@ -57,7 +63,8 @@ export function sendRemoteRuntimeRequestWithStatusPreflight<TResult>(
   validateStatus: (response: RuntimeRpcResponse<RuntimeStatus>) => void,
   envelope?: RuntimeOrchestrationEnvelope,
   clientCapabilities: readonly RuntimeCapability[] = [],
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  expectedRuntimeSource?: ExpectedRuntimeSource
 ): Promise<RuntimeRpcResponse<TResult>> {
   return sendRemoteRuntimeRequestOnSocket(
     connection,
@@ -67,7 +74,8 @@ export function sendRemoteRuntimeRequestWithStatusPreflight<TResult>(
     envelope,
     validateStatus,
     signal,
-    clientCapabilities
+    clientCapabilities,
+    expectedRuntimeSource
   )
 }
 

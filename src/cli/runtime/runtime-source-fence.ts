@@ -39,6 +39,27 @@ export class RuntimeSourceFence {
 
   async check(
     metadata: RuntimeMetadata,
+    method: string,
+    pinnedSource?: ExpectedRuntimeSource
+  ): Promise<ExpectedRuntimeSource | undefined> {
+    if (pinnedSource && metadata.runtimeId !== pinnedSource.runtimeId) {
+      throw new RuntimeClientError(
+        'runtime_source_mismatch',
+        'The pinned runtime changed. Nothing was sent.'
+      )
+    }
+    const inheritedSource = await this.checkLaunchingSource(metadata, method)
+    if (pinnedSource && inheritedSource && pinnedSource.sourceId !== inheritedSource.sourceId) {
+      throw new RuntimeClientError(
+        'runtime_source_mismatch',
+        'The pinned profile differs from the launching profile. Nothing was sent.'
+      )
+    }
+    return pinnedSource ?? inheritedSource
+  }
+
+  private async checkLaunchingSource(
+    metadata: RuntimeMetadata,
     method: string
   ): Promise<ExpectedRuntimeSource | undefined> {
     // status.get is the read-only probe itself.
