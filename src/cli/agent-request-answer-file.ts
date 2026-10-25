@@ -1,4 +1,5 @@
 import { readFile, stat } from 'node:fs/promises'
+import { TextDecoder } from 'node:util'
 import { z } from 'zod'
 import { RuntimeClientError } from './runtime/types'
 import { AgentRequestMarkerSchema } from './agent-request-inventory'
@@ -26,17 +27,18 @@ const AnswerFile = z
   .strict()
 export type AgentRequestAnswerFile = z.infer<typeof AnswerFile>
 
-/** Loads a size-checked JSON answer file and reports read or parse failures as safe CLI errors. */
+/** Loads size-checked JSON using strict UTF-8, allowing one leading BOM and rejecting invalid bytes. */
 export async function readAgentRequestAnswerFile(path: string): Promise<AgentRequestAnswerFile> {
   try {
     const info = await stat(path)
     if (!info.isFile() || info.size > 128 * 1024) {
       throw new Error('size')
     }
-    const content = await readFile(path, 'utf8')
-    if (Buffer.byteLength(content, 'utf8') > 128 * 1024) {
+    const bytes = await readFile(path)
+    if (bytes.byteLength > 128 * 1024) {
       throw new Error('size')
     }
+    const content = new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(bytes)
     return parseAgentRequestAnswerFile(JSON.parse(content.replace(/^\uFEFF/, '')))
   } catch {
     throw new RuntimeClientError(

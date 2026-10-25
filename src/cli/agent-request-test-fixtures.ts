@@ -1,3 +1,6 @@
+import { mkdtemp, rm, rmdir, writeFile } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { vi } from 'vitest'
 import type { RuntimeRpcSuccess } from './runtime-client'
 import type { AgentRequestClient } from './agent-request-inventory'
@@ -52,6 +55,22 @@ export function answerFile() {
     expectedRevision: 1,
     clientOperationId: '33333333-3333-4333-8333-333333333333',
     optionId: 'approve'
+  }
+}
+
+/** Gives byte-level file tests one temporary file and removes it even when their assertions fail. */
+export async function withAnswerBytes<T>(
+  bytes: Uint8Array,
+  run: (path: string) => Promise<T>
+): Promise<T> {
+  const directory = await mkdtemp(join(tmpdir(), 'orca-answer-utf8-'))
+  const path = join(directory, 'answer.json')
+  try {
+    await writeFile(path, bytes)
+    return await run(path)
+  } finally {
+    await rm(path, { force: true })
+    await rmdir(directory)
   }
 }
 

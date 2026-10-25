@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { answerAgentRequest } from './agent-request-answer'
-import { nativeAnswerParams, parseAgentRequestAnswerFile } from './agent-request-answer-file'
+import {
+  nativeAnswerParams,
+  parseAgentRequestAnswerFile,
+  readAgentRequestAnswerFile
+} from './agent-request-answer-file'
 import {
   REQUEST_MARKER,
   REQUEST_PROMPT,
@@ -9,6 +13,7 @@ import {
   REQUEST_SOURCE,
   REQUEST_WORKSPACE,
   answerFile,
+  withAnswerBytes,
   requestFixtureClient
 } from './agent-request-test-fixtures'
 import { RuntimeRpcFailureError } from './runtime/types'
@@ -25,6 +30,29 @@ const ok = (result: unknown) => ({
 const isMutation = (method: string) => method.startsWith('agentSession.respondTo')
 
 describe('native answer JSON and admission', () => {
+  it.each([false, true])(
+    'preserves valid Unicode and typed text with leading BOM=%s',
+    async (bom) => {
+      const { optionId: _option, ...base } = answerFile()
+      const answers = [
+        { questionId: 'q1', optionIds: [], other: '한글 🙂\n둘째 줄 \uFFFD \uFEFF 그대로' }
+      ]
+      const input = { ...base, kind: 'question', answers }
+      const bytes = Buffer.from((bom ? '\uFEFF' : '') + JSON.stringify(input), 'utf8')
+      await withAnswerBytes(bytes, async (path) => {
+        expect(await readAgentRequestAnswerFile(path)).toMatchObject(input)
+      })
+    }
+  )
+
+  it('rejects a second leading BOM rather than silently stripping it too', async () => {
+    const bytes = Buffer.from(`\uFEFF\uFEFF${JSON.stringify(answerFile())}`, 'utf8')
+    await withAnswerBytes(bytes, async (path) => {
+      await expect(readAgentRequestAnswerFile(path)).rejects.toMatchObject({
+        code: 'invalid_argument'
+      })
+    })
+  })
   it('preserves exact grouped question ids, choices, newlines and UTF-8 answer text', () => {
     const input = answerFile()
     const { optionId: _option, ...base } = input
