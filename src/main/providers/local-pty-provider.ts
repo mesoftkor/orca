@@ -142,6 +142,7 @@ export class LocalPtyProvider implements IPtyProvider {
     return hasLocalPtyChildProcesses(id)
   }
 
+  /** Reports foreground and child-process evidence plus Claude peer data, fenced to the inspected incarnation. */
   async inspectProcess(
     id: string,
     options?: PtyProcessInspectionOptions

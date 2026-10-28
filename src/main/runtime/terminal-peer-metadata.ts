@@ -2,6 +2,7 @@ import type { RuntimeTerminalSummary } from '../../shared/runtime-terminal-contr
 import type { RuntimePtyController } from './runtime-pty-controller-contract'
 import type { RuntimePtyWorktreeRecord } from './runtime-terminal-state-records'
 
+/** Adds Claude peer fields to a listed terminal; any inspection failure returns the terminal unchanged. */
 export async function enrichTerminalPeerMetadata(
   terminal: RuntimeTerminalSummary,
   deps: {

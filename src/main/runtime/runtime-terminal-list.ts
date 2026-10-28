@@ -55,6 +55,7 @@ type RuntimeTerminalListDependencies = {
 export class RuntimeTerminalList {
   constructor(private readonly deps: RuntimeTerminalListDependencies) {}
 
+  /** Lists terminals, enriching them in small batches so peer inspection cannot flood the host. */
   async list(
     worktreeSelector: string | undefined,
     limit: number,

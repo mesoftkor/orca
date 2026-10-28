@@ -120,6 +120,7 @@ export async function resolveAgentForegroundProcess(
     .processName
 }
 
+/** Resolves the foreground agent name and PID; a failed scan reports unavailable so callers keep the last agent. */
 export async function resolveAgentForegroundProcessWithAvailability(
   shellPid: number | null | undefined,
   fallbackProcess: string | null,
@@ -174,6 +175,7 @@ export async function resolveAgentForegroundProcessWithAvailability(
   }
 }
 
+/** Name-only view of the foreground agent identity for callers that need no PID. */
 export function resolveAgentForegroundProcessFromPs(
   rows: readonly ProcessTableRow[],
   shellPid: number
@@ -181,6 +183,7 @@ export function resolveAgentForegroundProcessFromPs(
   return resolveAgentForegroundIdentityFromPs(rows, shellPid)?.processName ?? null
 }
 
+/** Keeps the outer wrapper's name and PID together so peer lookup never targets an embedded child. */
 function resolveAgentForegroundIdentityFromPs(
   rows: readonly ProcessTableRow[],
   shellPid: number

@@ -43,6 +43,7 @@ export const createPaneForegroundAgentSlice: StateCreator<
   PaneForegroundAgentSlice
 > = (set) => ({
   paneForegroundAgentByPaneKey: {},
+  /** Skips the update when every field, including peer metadata, is unchanged. */
   setPaneForegroundAgent: (paneKey, entry) => {
     set((s) => {
       const current = s.paneForegroundAgentByPaneKey[paneKey]

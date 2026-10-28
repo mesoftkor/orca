@@ -29,6 +29,7 @@ type CompletionDispatch = (
 // Two foreground misses can span one process handoff; only sustained absence confirms exit.
 const LOCAL_PROCESS_EXIT_SETTLE_MS = POLL_TIER_INTERVAL_MS.active * 2
 
+/** Applies one process inspection to completion state and forwards peer metadata to the pane. */
 export function handleAgentCompletionInspectionResult(args: {
   result: RuntimeTerminalProcessInspection
   requestStartedAtMonotonic: number

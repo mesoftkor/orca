@@ -8,6 +8,7 @@ import { listClaudeProfileHomesAsync } from '../claude-accounts/claude-profile-h
 const REFRESH_MS = 2_000
 const MAX_SESSION_BYTES = 64 * 1024
 
+/** Session-file strings reach the UI and JSON output, so reject empty, oversized, or control-char values. */
 function displayString(value: unknown): value is string {
   return (
     typeof value === 'string' &&
@@ -17,6 +18,7 @@ function displayString(value: unknown): value is string {
   )
 }
 
+/** Reads a Claude process's name and permission mode from its PID session file, cached briefly per PID. */
 export class ClaudePeerIdentityReader {
   private cached?: { pid: number; at: number; value: ClaudePeerIdentity | undefined }
   private pending?: { pid: number; value: Promise<ClaudePeerIdentity | undefined> }
@@ -31,6 +33,7 @@ export class ClaudePeerIdentityReader {
       configDir?.trim() || process.env.CLAUDE_CONFIG_DIR?.trim() || join(homedir(), '.claude')
   }
 
+  /** Resolves undefined for non-Claude processes or when no valid session file exists. */
   read(
     processName: string | null,
     pid: number | null | undefined
@@ -64,6 +67,7 @@ export class ClaudePeerIdentityReader {
     return value
   }
 
+  /** The pane's own config dir wins; account profile homes are fallbacks for switched accounts. */
   private async *configDirs(): AsyncGenerator<string> {
     yield this.configDir
     if (this.dataRoot) {
@@ -75,6 +79,7 @@ export class ClaudePeerIdentityReader {
     }
   }
 
+  /** Accepts a file only when its recorded pid matches, so a recycled or stale file never labels another process. */
   private async readSession(pid: number): Promise<ClaudePeerIdentity | undefined> {
     for await (const dir of this.configDirs()) {
       // Open only the PID's public JSON; never enumerate session files or touch messaging keys.

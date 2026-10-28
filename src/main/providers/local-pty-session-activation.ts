@@ -45,6 +45,7 @@ import { destroyPtyProcess, createPtyPhysicalExit } from './local-pty-terminatio
 import { writeStartupCommandWhenShellReady } from './local-pty-shell-ready-startup-command'
 import type { PtySpawnOptions, PtySpawnResult } from './pty-provider-contract'
 
+/** Registers a spawned PTY's state; WSL PTYs get no peer reader because the Windows side cannot read their session files. */
 export function activateLocalPtySession(args: {
   id: string
   incarnationId: string

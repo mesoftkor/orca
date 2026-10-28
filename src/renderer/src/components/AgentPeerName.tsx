@@ -1,5 +1,6 @@
 import { useAppStore } from '@/store'
 
+/** Shows the Claude peer name for a pane; other agents render nothing. */
 export function AgentPeerName({
   paneKey,
   agentType

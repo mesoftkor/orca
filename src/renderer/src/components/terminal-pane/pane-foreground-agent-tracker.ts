@@ -100,6 +100,7 @@ export function createPaneForegroundAgentTracker(deps: PaneForegroundAgentTracke
     }
   }
 
+  /** Reads the foreground process and publishes the recognized agent with its peer identity. */
   async function readForeground(
     generation: number,
     retryIndex: number,

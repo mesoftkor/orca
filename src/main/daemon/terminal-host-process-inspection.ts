@@ -34,6 +34,7 @@ type RetiredIncarnation = { incarnationId: string; code: number; expiresAt: numb
 /** Cheap POSIX polls reuse anchored identity; unresolved reads escalate to full evidence capture. */
 export type TerminalHostInspectionTier = 'full' | 'cheap'
 
+/** Inspects a hosted session's foreground and children, attaching Claude peer data only if the session is unchanged. */
 export async function inspectTerminalHostProcess(args: {
   sessionId: string
   session: Session | null

@@ -47,6 +47,7 @@ export function shouldCachePtyForeground(name: string | null, staticName: boolea
   )
 }
 
+/** Picks the tty foreground process and pairs a recognized agent with its own PID. */
 export function resolveSpawnFileForegroundFromRows(
   rows: readonly ProcessTableRow[],
   rootPid: number
