@@ -29,6 +29,8 @@ import {
   clearPtyState,
   pendingLocalPtySpawns,
   ptyProcesses,
+  ptyClaudePeerReaders,
+  ptyLastRecognizedForeground,
   ptyIncarnations,
   resetLoadGeneration,
   type DataCallback,
@@ -166,6 +168,9 @@ export class LocalPtyProvider implements IPtyProvider {
       options?.steadyState !== true,
       options?.ignoreDetached === true
     )
+    const peerIdentity = await ptyClaudePeerReaders
+      .get(id)
+      ?.read(foregroundProcess, ptyLastRecognizedForeground.get(id)?.pid)
     // Neither asynchronous inspection may publish a replacement pane's identity.
     if (ptyProcesses.get(id) !== proc || ptyIncarnations.get(id) !== incarnation) {
       return {
@@ -177,7 +182,8 @@ export class LocalPtyProvider implements IPtyProvider {
     return {
       foregroundProcess,
       hasChildProcesses: childProcessEvidence !== 'no-children',
-      childProcessEvidence
+      childProcessEvidence,
+      ...peerIdentity
     }
   }
 

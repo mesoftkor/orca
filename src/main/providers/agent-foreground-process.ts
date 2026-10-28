@@ -1,5 +1,5 @@
 import { recognizeAgentProcessFromCommandLine } from '../../shared/agent-process-recognition'
-import { resolveOuterWrapperForegroundProcess } from '../../shared/foreground-wrapper-agent'
+import { resolveOuterWrapperForegroundIdentity } from '../../shared/foreground-wrapper-agent'
 import type { ProcessTableRow } from '../../shared/process-table-snapshot'
 import {
   getFreshProcessTableSnapshot,
@@ -37,7 +37,7 @@ export {
 export type AgentForegroundProcessResolution = {
   available: boolean
   processName: string | null
-  /** Windows liveness anchor for an unambiguous recognized name; omitted for fallbacks and POSIX. */
+  /** PID of the process that supplied the recognized identity; omitted for fallbacks. */
   processId?: number
   /** Windows: the scan proved the caller's `anchorProcessId` is now a non-agent. */
   anchorPidForeign?: boolean
@@ -166,7 +166,7 @@ export async function resolveAgentForegroundProcessWithAvailability(
     }
     return {
       available: true,
-      processName: resolveAgentForegroundProcessFromPs(rows, shellPid) ?? fallbackProcess
+      ...(resolveAgentForegroundIdentityFromPs(rows, shellPid) ?? { processName: fallbackProcess })
     }
   } catch {
     // Why: a failed scan cannot prove fallback ownership; callers retain the last recognized agent.
@@ -178,10 +178,17 @@ export function resolveAgentForegroundProcessFromPs(
   rows: readonly ProcessTableRow[],
   shellPid: number
 ): string | null {
+  return resolveAgentForegroundIdentityFromPs(rows, shellPid)?.processName ?? null
+}
+
+function resolveAgentForegroundIdentityFromPs(
+  rows: readonly ProcessTableRow[],
+  shellPid: number
+): { processName: string; processId: number } | null {
   const found = selectAgentForegroundFromPs(rows, shellPid)
-  // Preserve the outer OMP identity across its embedded Pi child.
+  // Pair the wrapper name with its own PID, so peer lookup never targets an embedded child.
   return found
-    ? resolveOuterWrapperForegroundProcess(
+    ? resolveOuterWrapperForegroundIdentity(
         found.selected.recognized,
         found.selected.candidate,
         found.candidates

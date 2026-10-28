@@ -115,10 +115,8 @@ export function createPaneForegroundAgentTracker(deps: PaneForegroundAgentTracke
       hasForegroundAgentEvidence ||
       hasKnownAgentEvidence ||
       hasAgentExpectation
-    const { processName, remoteEvidenceVerdict, expectedIncarnationId, remote } = await readProcess(
-      ptyId,
-      requiresRoutingConfirmation
-    )
+    const { processName, peerIdentity, remoteEvidenceVerdict, expectedIncarnationId, remote } =
+      await readProcess(ptyId, requiresRoutingConfirmation)
     // Fence pending inspection so an old PTY cannot publish identity into its replacement.
     if (
       disposed ||
@@ -130,15 +128,18 @@ export function createPaneForegroundAgentTracker(deps: PaneForegroundAgentTracke
       return
     }
     const recognized =
-      remoteEvidenceVerdict === 'live'
-        ? recognizeAgentProcess(processName)
-        : remoteEvidenceVerdict !== null
-          ? null
-          : recognizeAgentProcess(processName)
+      (!remoteEvidenceVerdict || remoteEvidenceVerdict === 'live') &&
+      recognizeAgentProcess(processName)
     if (recognized) {
       hasForegroundAgentEvidence = true
       hasAgentExpectation = false
+      const published = deps.getPublishedEntry?.()
+      // A metadata-free inspection clears the old peer; string-only reads preserve it.
+      const peer = peerIdentity ?? (published?.agent === recognized.agent ? published : undefined)
       deps.publish({
+        agentName: peer?.agentName,
+        agentPid: peer?.agentPid,
+        permissionMode: peer?.permissionMode,
         agent: recognized.agent,
         agentEvidence: 'process-read',
         shellForeground: false,
